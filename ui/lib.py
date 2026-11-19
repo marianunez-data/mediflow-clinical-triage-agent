@@ -6,6 +6,9 @@ from typing import Any
 
 import httpx
 import streamlit as st
+from arranque import asegurar_api
+
+asegurar_api()
 
 API_URL = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
 TIMEOUT = float(os.getenv("API_TIMEOUT", "120"))

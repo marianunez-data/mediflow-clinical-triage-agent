@@ -17,6 +17,10 @@ UI = Path(__file__).resolve().parents[1]
 if str(UI) not in sys.path:
     sys.path.insert(0, str(UI))  # para importar ui/auditoria.py también si la página se abre sola
 
+from arranque import asegurar_api  # noqa: E402
+
+asegurar_api()
+
 import auditoria as aud  # noqa: E402
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
