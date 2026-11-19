@@ -5,6 +5,8 @@ on:
 concurrency: deploy-prod
 jobs:
   guard:
+    # Solo despliega en la VM de OCI desde el repositorio original del equipo, no desde forks
+    if: github.repository == 'No-Country-simulation/G10-LATAM-equipo-37-Mediflow'
     runs-on: ubuntu-latest
     outputs:
       pr_merged: ${{ steps.check_pr.outputs.merged }}
