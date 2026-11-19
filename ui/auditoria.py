@@ -266,6 +266,26 @@ def evidencias_por_campo(extraccion: dict) -> dict[str, str]:
     }
 
 
+# Campos opcionales que tiene sentido completar a mano según el tipo de documento. Los datos del paciente,
+# del médico y la fecha valen para todos; el resto solo donde el tipo los trae.
+_DIAGNOSTICO = {"diagnostico_principal", "cie10_sugerido"}
+CAMPOS_POR_TIPO = {
+    "Receta Medica": _DIAGNOSTICO,
+    "Informe de Estudio por Imagenes": {"estudio_realizado", "hallazgos", "conclusion"} | _DIAGNOSTICO,
+    "Informe de Laboratorio": {"estudio_realizado", "hallazgos", "conclusion"} | _DIAGNOSTICO,
+    "Orden de Solicitud de Procedimiento": {"procedimiento_solicitado"} | _DIAGNOSTICO,
+    "Epicrisis": {"diagnostico_egreso"} | _DIAGNOSTICO,
+    "Certificado Medico": _DIAGNOSTICO,
+}
+
+
+def campo_aplica(tipo: str | None, ruta: str) -> bool:
+    """Si un campo vacío tiene sentido para este tipo de documento."""
+    if ruta.startswith(("paciente.", "medico_solicitante.")) or ruta in ("fecha", "institucion"):
+        return True
+    return ruta in CAMPOS_POR_TIPO.get(str(tipo), set())
+
+
 def campos_del_formulario(extraccion: dict) -> tuple[list[str], list[str], dict[str, Any]]:
     """Qué campos se muestran para revisar, cuáles quedan vacíos para completar si hace falta, y qué datos
     se muestran solo para leer.

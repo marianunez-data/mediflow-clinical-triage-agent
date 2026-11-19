@@ -537,7 +537,7 @@ def test_una_urgencia_fuera_de_emergencia_se_marca(app, monkeypatch):
     extraccion["decision_enrutamiento"]["destino_principal"] = "Historia_Clinica_Electronica"
     con_cola(monkeypatch, [{"documento_id": "GS-14", "extraccion": extraccion}])
     app.run()
-    assert app.error[0].value.startswith("**Prioridad urgente, pero el destino es Historia\\_Clinica\\_Electronica.**")
+    assert app.error[0].value.startswith("**Prioridad urgente, pero el destino es Historia clínica.**")
 
 
 def test_una_extraccion_rara_se_muestra_sin_romper(app, monkeypatch):

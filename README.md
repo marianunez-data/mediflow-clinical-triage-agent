@@ -29,14 +29,18 @@ It was built by a team of 8 in Hackathon ONE G10 and deployed on Oracle Cloud Al
 | Live demo | [mediflow-clinical-triage-agent.streamlit.app](https://mediflow-clinical-triage-agent.streamlit.app) |
 | Original team repository | [No-Country-simulation/G10-LATAM-equipo-37-Mediflow](https://github.com/No-Country-simulation/G10-LATAM-equipo-37-Mediflow) |
 
-In the demo, open **Carga**, pick an example scenario (routine, urgency, ambiguity, high-risk drug, prompt injection, out of scope) and process it in one click. Then check the audit queue, the metrics dashboard and the trace. Every document is synthetic: no data belongs to a real patient.
+In the demo, open **Procesar documento**, pick an example scenario (routine, urgency, ambiguity, high-risk drug, prompt injection, out of scope) and process it in one click. Then check the audit queue, the metrics dashboard and the trace. Every document is synthetic: no data belongs to a real patient.
 
 <p align="center">
-  <img src="docs/img/demo-carga.png" width="49%" alt="Prompt injection case routed to the emergency queue">
-  <img src="docs/img/demo-auditoria.png" width="49%" alt="Human-in-the-loop audit panel">
+  <img src="docs/img/demo-inicio.png" width="49%" alt="Home page">
+  <img src="docs/img/demo-carga.png" width="49%" alt="Prompt injection case routed to Emergency">
 </p>
 <p align="center">
-  <img src="docs/img/demo-metricas-operacion.png" width="49%" alt="Operations dashboard">
+  <img src="docs/img/demo-auditoria.png" width="49%" alt="Human-in-the-loop audit panel">
+  <img src="docs/img/demo-trazas.png" width="49%" alt="Step-by-step agent trace">
+</p>
+<p align="center">
+  <img src="docs/img/demo-documentos.png" width="49%" alt="Review queue and processed documents">
   <img src="docs/img/demo-metricas-calidad.png" width="49%" alt="Agent quality dashboard from the evaluation run">
 </p>
 
@@ -118,7 +122,7 @@ I was the team's Data Scientist. My work, all visible in the commit history:
 - **Rules, scope and guardrails.** Wrote the urgency-by-document-type rule (rule A) in `rules.yaml`, the out-of-scope categories, the guardrails and the privacy-by-design notes.
 - **Planning and documentation.** Set up the repository structure, the API contract, the decision log and the final project documentation.
 
-After the hackathon, in this fork, I deployed the public demo on Streamlit Community Cloud, with the API running inside the same app, and added one-click example scenarios so anyone can test it without preparing documents.
+After the hackathon, in this fork, I deployed the public demo on Streamlit Community Cloud with the API running inside the same app, redesigned the interface around one design system (decision card, review queue, step-by-step trace, readable rules) and added one-click example scenarios so anyone can test it without preparing documents.
 
 ## Team
 
@@ -173,7 +177,24 @@ curl -s -X POST http://localhost:8000/triage \
 ## Deployment
 
 - **Streamlit Community Cloud (current demo).** The app runs `ui/Inicio.py`. When no external `API_URL` is set, [`ui/arranque.py`](ui/arranque.py) starts the FastAPI service inside the same process, and [`packages.txt`](packages.txt) installs Tesseract. With a `GROQ_API_KEY` secret the demo uses the language model; without it, it runs on the rules engine. Every push to `main` redeploys it.
-- **Oracle Cloud (hackathon).** Object Storage for documents and an Ampere A1 VM with Docker Compose, Nginx and n8n, deployed on every merge. Setup in [`docs/oci-setup.md`](docs/oci-setup.md) and [`infra/`](infra/).
+- **Oracle Cloud (hackathon).** Object Storage for documents and an Ampere A1 VM with Docker Compose, Nginx and n8n, deployed on every merge to `main`. Setup in [`docs/oci-setup.md`](docs/oci-setup.md) and [`infra/`](infra/).
+
+### Evidence of the Oracle Cloud deployment
+
+The hackathon VM was shut down after the event, so the public URL no longer responds. The deployment is documented here:
+
+- **Deploy history:** every merge to `main` in the team repository ran [`deploy.yml`](https://github.com/No-Country-simulation/G10-LATAM-equipo-37-Mediflow/actions/workflows/deploy.yml), which pulled the code on the OCI VM, rebuilt the containers and checked `/api/health` before finishing.
+- **Production checks on 24/10/2026** against the public OCI URL, with Groq as the model:
+
+| Case | Result | Time |
+|---|---|---|
+| GS-28, certificate (text) | Electronic Health Record | about 2 s |
+| GS-07, pulmonary embolism (text) | Emergency queue and Slack alert | about 3 s |
+| GS-07, pulmonary embolism (scanned photo) | Emergency queue and Slack alert | 9.9 s |
+| GS-06, prescription with out-of-range dose | Human review queue | 3.6 s |
+| FA-05, critical potassium with a hidden instruction | Emergency queue: instruction ignored, alert without the patient's name | 3.4 s |
+
+- **Infrastructure as code:** VM setup script, minimal IAM policies, production Docker Compose and Nginx config in [`infra/`](infra/), and the bucket layout by status (`recibidos/`, `procesados/urgentes/`, `auditoria_humana/`, `rechazados/`) in [`docs/README_es.md`](docs/README_es.md#despliegue-en-oracle-cloud).
 
 ## Known limits
 

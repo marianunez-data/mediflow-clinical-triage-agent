@@ -22,6 +22,7 @@ from arranque import asegurar_api  # noqa: E402
 asegurar_api()
 
 import auditoria as aud  # noqa: E402
+import estilo  # noqa: E402
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 IMAGENES = ("image/png", "image/jpeg", "image/webp", "image/gif")
@@ -179,8 +180,11 @@ def formulario(documento_id: str, extraccion: dict) -> dict:
                 medicamentos = tabla_medicamentos([], None, clave("campo:medicamentos"))
                 estudios = area_estudios([], clave("campo:estudios_solicitados"))
 
+        vacios = [ruta for ruta in vacios if aud.campo_aplica(tipo_original, ruta)]
         if vacios:
-            with st.expander(f"Campos vacíos ({len(vacios)})"):
+            with st.expander(f"Completar datos que el agente no encontró ({len(vacios)}, opcional)"):
+                st.caption("Llénalos solo si el documento trae ese dato y el agente no lo leyó. Si el documento "
+                           "no lo tiene, déjalos vacíos: no hace falta para aprobar.")
                 for ruta in vacios:
                     escritos[ruta] = campo(ruta, None, False, None, clave(f"campo:{ruta}"))
         if solo_lectura:
@@ -280,10 +284,11 @@ estado._revisor = estado.revisor
 estado._demo = demo
 prefijo = "demo" if demo else "api"
 
-st.title("Auditoría humana")
-st.caption(
-    "Documentos que el agente no puede decidir solo. Compara el original con lo que extrajo el agente y decide: "
-    "aprobar, corregir o rechazar."
+estilo.aplicar()
+estilo.encabezado(
+    "Auditoría humana",
+    "Documentos que el agente no decidió solo. Compara el original con lo que extrajo el agente y decide: "
+    "aprobar, corregir o rechazar. Escribe tu nombre en la barra lateral antes de decidir.",
 )
 
 if estado.get("modo") != prefijo:  # la última decisión era del otro modo
@@ -351,16 +356,16 @@ validacion = extraccion["validacion"]
 if aud.es_urgente(extraccion):
     destino = decision_actual.get("destino_principal")
     aviso = aud.como_dict(decision_actual.get("notificacion_generada"))
-    canal = f" y se avisó por {aud.md(aviso['canal'])}" if aviso.get("canal") else ""
+    canal = " y la guardia ya recibió el aviso" if aviso.get("canal") else ""
     if destino == aud.DESTINO_URGENCIA:
         st.error(
-            f"**Urgente.** Ya está en {destino}{canal}. Esta revisión no frena la urgencia: sirve para que los "
-            "datos queden bien."
+            f"**Urgente.** Ya está en la cola de {estilo.nombre_destino(destino)}{canal}. Esta revisión no frena "
+            "la urgencia: sirve para que los datos queden bien."
         )
     else:
         st.error(
-            f"**Prioridad urgente, pero el destino es {aud.md(destino or 'ninguno')}.** Una urgencia va siempre "
-            f"a {aud.DESTINO_URGENCIA}: revisa la prioridad."
+            f"**Prioridad urgente, pero el destino es {aud.md(estilo.nombre_destino(destino))}.** Una urgencia va "
+            "siempre a Emergencia: revisa la prioridad."
         )
 
 titulo, justificacion = aud.motivo_revision(extraccion)
@@ -380,10 +385,11 @@ with izquierda:
 with derecha:
     st.subheader("Lo que extrajo el agente")
     score = aud.score_de(extraccion)
-    st.markdown(
-        f"**Destino actual:** {aud.md(decision_actual.get('destino_principal') or '—')} · "
-        f"**Confianza:** {f'{round(score * 100)} %' if score is not None else '—'} · "
-        f"**Canal:** {aud.md(extraccion.get('canal_origen') or '—')}"
+    estilo.html_(
+        '<div class="mf-fichas" style="margin-bottom:12px">'
+        f'{estilo.badge_destino(decision_actual.get("destino_principal"))}'
+        f'<span class="mf-ficha">Confianza {estilo.e(estilo.porcentaje(score))}</span>'
+        f'<span class="mf-ficha">Canal {estilo.e(extraccion.get("canal_origen") or "—")}</span></div>'
     )
     enviado = formulario(documento_id, extraccion)
     if enviado["accion"]:

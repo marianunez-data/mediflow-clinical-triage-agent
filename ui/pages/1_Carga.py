@@ -12,7 +12,9 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from lib import api_request, remember_document, render_result, show_api_error
+import auditoria as aud
+import estilo
+from lib import api_request, remember_document, show_api_error, show_document_preview
 
 RAIZ = Path(__file__).resolve().parents[2]
 CARPETA_EJEMPLOS = RAIZ / "evals" / "golden" / "files"
@@ -30,13 +32,16 @@ EJEMPLOS = {
     "Fuera de alcance · receta veterinaria (FA-07, PDF)": "FA-07.pdf",
 }
 
-st.title("📄 Carga de documento")
-st.caption("El original se conserva en la sesión para que pueda ser revisado si el grafo solicita auditoría humana.")
-
+estilo.aplicar()
+estilo.encabezado(
+    "Procesar documento",
+    "Elige un escenario de ejemplo o sube tu propio archivo. El agente lo lee, lo clasifica, extrae los datos, "
+    "busca urgencias y decide a qué cola va.",
+)
 if DEMO:
-    st.warning(
-        "Demo pública: usa solo documentos sintéticos. No subas datos reales de pacientes. "
-        "Los documentos se borran cuando el servidor se reinicia."
+    estilo.html_(
+        '<div class="mf-aviso"><b>Demo pública.</b> Usa solo documentos sintéticos: no subas datos reales de '
+        "pacientes. Lo que proceses se borra cuando el servidor se reinicia.</div>"
     )
 
 
@@ -87,7 +92,7 @@ tab_ejemplo, tab_subir = st.tabs(["Probar con un ejemplo", "Subir mi documento"]
 
 with tab_ejemplo:
     if ejemplos_disponibles:
-        st.write("Elige un escenario y procésalo en un clic. Todos los documentos son sintéticos.")
+        st.caption("Documentos sintéticos del conjunto de prueba del equipo, uno por cada tipo de decisión.")
         elegido = st.selectbox("Escenario", list(ejemplos_disponibles))
         nombre = ejemplos_disponibles[elegido]
         ruta = CARPETA_EJEMPLOS / nombre
@@ -110,11 +115,12 @@ with tab_ejemplo:
 with tab_subir:
     with st.form("triage_upload"):
         uploaded = st.file_uploader(
-            "Selecciona un PDF, imagen, texto o JSON",
+            "Archivo PDF, imagen, texto o JSON (máximo 20 MB)",
             type=["pdf", "png", "jpg", "jpeg", "tif", "tiff", "webp", "txt", "json"],
         )
         document_id = st.text_input("ID del documento", key="carga_id")
-        channel = st.text_input("Canal de origen", value="streamlit")
+        channel = st.text_input("Canal de origen", value="streamlit",
+                                help="Por dónde llegó el documento: queda registrado con el resultado.")
         submitted = st.form_submit_button("Procesar documento", type="primary")
 
     if submitted:
@@ -125,13 +131,44 @@ with tab_subir:
         else:
             _procesar(uploaded, document_id.strip(), channel.strip())
 
+
+
+def _datos_extraidos(result: dict) -> None:
+    datos = result.get("datos_extraidos") or {}
+    planos = {k: v for k, v in aud.aplanar(datos).items() if k not in aud.LISTAS and v not in (None, "", [])}
+    medicamentos = [m for m in datos.get("medicamentos") or [] if isinstance(m, dict)]
+    estudios = [str(x) for x in datos.get("estudios_solicitados") or [] if x]
+    if not (planos or medicamentos or estudios):
+        st.caption("El agente no extrajo datos de este documento.")
+        return
+    if planos:
+        filas = [[estilo.e(aud.etiqueta_campo(k)), estilo.e(v)] for k, v in planos.items()]
+        estilo.html_(estilo.tabla(["Dato", "Valor"], filas))
+    if medicamentos:
+        st.markdown("**Medicamentos**")
+        filas = [[estilo.e(m.get(c) or "—") for c in ("nombre", "dosis", "frecuencia", "duracion")]
+                 + [estilo.badge("Alto riesgo", "#d98a0b") if m.get("alto_riesgo") else ""] for m in medicamentos]
+        estilo.html_(estilo.tabla(["Nombre", "Dosis", "Frecuencia", "Duración", ""], filas))
+    if estudios:
+        st.markdown("**Estudios solicitados:** " + ", ".join(estudios))
+
+
 result = st.session_state.get("last_triage_result")
 if result:
     st.divider()
-    render_result(result)
+    estilo.html_(estilo.tarjeta_resultado(result))
     decision = result.get("decision_enrutamiento", {})
-    if result.get("status") == "revision_humana" or decision.get("requiere_auditoria_humana"):
-        with st.expander("Abrir documento para auditoría", expanded=True):
-            from lib import show_document_preview
+    en_revision = result.get("status") == "revision_humana" or decision.get("requiere_auditoria_humana")
+    l1, l2, l3, _ = st.columns([1.2, 1, 1, 1.3])
+    if en_revision:
+        l1.page_link("pages/3_Auditoria.py", label="Resolver en Auditoría", icon=":material/fact_check:")
+    l2.page_link("pages/6_Trazas.py", label="Ver la traza", icon=":material/timeline:")
+    l3.page_link("pages/2_Cola_de_triaje.py", label="Ver documentos", icon=":material/inbox:")
 
-            show_document_preview()
+    datos_tab, original_tab, json_tab = st.tabs(["Datos extraídos", "Documento original", "Respuesta JSON"])
+    with datos_tab:
+        _datos_extraidos(result)
+    with original_tab:
+        show_document_preview()
+    with json_tab:
+        st.json(result, expanded=False)

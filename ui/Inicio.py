@@ -1,51 +1,29 @@
-"""MediFlow Streamlit application entry point."""
-import os
+"""Punto de entrada de la app: arranca la API si hace falta y arma el menú con todas las páginas."""
 import sys
 from pathlib import Path
 
 import streamlit as st
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+UI = Path(__file__).resolve().parent
+sys.path.insert(0, str(UI))
 from arranque import asegurar_api  # noqa: E402
 
-st.set_page_config(page_title="MediFlow", page_icon="🏥", layout="wide")
+st.set_page_config(page_title="MediFlow · Triaje documental clínico", page_icon="🏥", layout="wide")
 asegurar_api()
 
-DEMO = os.getenv("MEDIFLOW_DEMO", "").lower() in ("1", "true", "yes")
-CON_MODELO = os.getenv("USE_LLM", "false").lower() in ("true", "1", "yes")
-
-st.title("MediFlow")
-st.subheader("Triaje documental clínico")
-st.markdown(
-    "Carga documentos clínicos, consulta su resultado de enrutamiento y revisa manualmente "
-    "los casos ambiguos sin perder el archivo original."
-)
-
-if DEMO:
-    st.info(
-        "**Cómo probarlo:** abre **Carga** en el menú lateral, elige un escenario de ejemplo "
-        "(rutina, urgencia, ambigüedad, alto riesgo, intento de engaño o fuera de alcance) y procésalo. "
-        "Luego revisa la **Cola de triaje**, la **Auditoría**, las **Métricas** y las **Trazas**."
-    )
-    if not CON_MODELO:
-        st.caption(
-            "Esta instancia corre con el motor de reglas, sin modelo de lenguaje: así se comporta MediFlow "
-            "cuando el proveedor de IA no responde. La detección de urgencias sigue activa."
-        )
-else:
-    st.info("Usa el menú lateral para cargar documentos, consultar la cola de auditoría y revisar métricas.")
-
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("Formatos soportados", "PDF, imagen, texto, JSON")
-with col2:
-    st.metric("Revisión humana", "AMB-1 a AMB-6")
-with col3:
-    st.metric("Procesamiento", "API + grafo LangGraph")
-
-st.caption("MediFlow realiza triaje documental; no interpreta imágenes médicas ni emite diagnósticos.")
-if DEMO:
-    st.caption(
-        "Demo pública con documentos sintéticos. No subas datos reales de pacientes. "
-        "Proyecto del Equipo 37, Hackathon ONE G10 (Oracle Next Education y Alura)."
-    )
+navegacion = st.navigation({
+    "": [
+        st.Page("pages/0_Portada.py", title="Inicio", icon=":material/home:", url_path="portada", default=True),
+    ],
+    "Operación": [
+        st.Page("pages/1_Carga.py", title="Procesar documento", icon=":material/upload_file:", url_path="carga"),
+        st.Page("pages/2_Cola_de_triaje.py", title="Documentos", icon=":material/inbox:", url_path="documentos"),
+        st.Page("pages/3_Auditoria.py", title="Auditoría", icon=":material/fact_check:", url_path="auditoria"),
+    ],
+    "Análisis": [
+        st.Page("pages/5_Metricas.py", title="Métricas", icon=":material/monitoring:", url_path="metricas"),
+        st.Page("pages/6_Trazas.py", title="Trazas", icon=":material/timeline:", url_path="trazas"),
+        st.Page("pages/4_Reglas.py", title="Reglas", icon=":material/tune:", url_path="reglas"),
+    ],
+})
+navegacion.run()
