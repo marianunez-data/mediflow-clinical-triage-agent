@@ -159,11 +159,12 @@ if result:
     estilo.html_(estilo.tarjeta_resultado(result))
     decision = result.get("decision_enrutamiento", {})
     en_revision = result.get("status") == "revision_humana" or decision.get("requiere_auditoria_humana")
-    l1, l2, l3, _ = st.columns([1.2, 1, 1, 1.3])
+    enlaces = [("pages/6_Trazas.py", "Ver la traza", ":material/timeline:"),
+               ("pages/2_Cola_de_triaje.py", "Ver documentos", ":material/inbox:")]
     if en_revision:
-        l1.page_link("pages/3_Auditoria.py", label="Resolver en Auditoría", icon=":material/fact_check:")
-    l2.page_link("pages/6_Trazas.py", label="Ver la traza", icon=":material/timeline:")
-    l3.page_link("pages/2_Cola_de_triaje.py", label="Ver documentos", icon=":material/inbox:")
+        enlaces.insert(0, ("pages/3_Auditoria.py", "Resolver en Auditoría", ":material/fact_check:"))
+    for columna, (pagina, texto, icono) in zip(st.columns(4), enlaces, strict=False):
+        columna.page_link(pagina, label=texto, icon=icono)
 
     datos_tab, original_tab, json_tab = st.tabs(["Datos extraídos", "Documento original", "Respuesta JSON"])
     with datos_tab:

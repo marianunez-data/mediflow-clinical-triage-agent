@@ -6,6 +6,8 @@
 
 Team project · Hackathon ONE G10 · Oracle Next Education & Alura · Equipo 37
 
+[Leer en español](docs/README_es.md)
+
 [![Live demo](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mediflow-clinical-triage-agent.streamlit.app)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-agent%20graph-1C3C3C)](https://github.com/langchain-ai/langgraph)
@@ -28,6 +30,11 @@ It was built by a team of 8 in Hackathon ONE G10 and deployed on Oracle Cloud Al
 |---|---|
 | Live demo | [mediflow-clinical-triage-agent.streamlit.app](https://mediflow-clinical-triage-agent.streamlit.app) |
 | Original team repository | [No-Country-simulation/G10-LATAM-equipo-37-Mediflow](https://github.com/No-Country-simulation/G10-LATAM-equipo-37-Mediflow) |
+
+<p align="center">
+  <a href="docs/video/mediflow-demo.mp4"><img src="docs/img/mediflow-demo.gif" width="90%" alt="MediFlow demo: a scanned CT report goes to Emergency"></a>
+  <br><sub><a href="docs/video/mediflow-demo.mp4">Watch the 2-minute demo (narrated, with English captions)</a></sub>
+</p>
 
 In the demo, open **Procesar documento**, pick an example scenario (routine, urgency, ambiguity, high-risk drug, prompt injection, out of scope) and process it in one click. Then check the audit queue, the metrics dashboard and the trace. Every document is synthetic: no data belongs to a real patient.
 
