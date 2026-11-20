@@ -140,7 +140,7 @@ After the hackathon, in this fork, I deployed the public demo on Streamlit Commu
 | Carolina Chambique | Human review inside the graph |
 | Cristian Ojeda | Validation, urgencies, rules, human review endpoints and QA |
 | Leidy Diana Gaitan Fiaga | Edge cases, test set documents and demo video |
-| Maria Camila Gonzalez Nuñez | Data Scientist: test set, evaluation, audit panel, metrics dashboard, planning and documentation |
+| Maria Camila Gonzalez Nuñez | planning of all team activities, synthetic data and test set, evaluation, support in the agent design, Streamlit development (audit panel and metrics dashboard during the hackathon, full redesign of the interface afterwards) and documentation |
 | Néstor Gribaudo | Decision graph, scoring, routing, legibility gate and traces |
 | Sabrina Valentim Guimaraes | API, worker, persistence and backups |
 
