@@ -29,7 +29,6 @@ It was built by a team of 8 in Hackathon ONE G10 and deployed on Oracle Cloud Al
 | What | Where |
 |---|---|
 | Live demo | [mediflow-clinical-triage-agent.streamlit.app](https://mediflow-clinical-triage-agent.streamlit.app) |
-| Original team repository | [No-Country-simulation/G10-LATAM-equipo-37-Mediflow](https://github.com/No-Country-simulation/G10-LATAM-equipo-37-Mediflow) |
 
 <p align="center">
   <a href="docs/video/mediflow-demo.mp4"><img src="docs/img/mediflow-demo.gif" width="90%" alt="MediFlow demo: a scanned CT report goes to Emergency"></a>
