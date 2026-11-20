@@ -117,7 +117,7 @@ Full report and error analysis: [`evals/resultados/2026-10-13_deepseek/`](evals/
 
 ## My contributions
 
-I was the team's Data Scientist. My work, all visible in the commit history:
+I was the project lead, with the roles of Data Scientist and AI Engineer, and I planned the activities of the whole team. My work, all visible in the commit history:
 
 - **Test set and labeling.** Designed the 45-item golden set and its 76 variants, covering the six document types, five outcomes (routine, high-risk drug, urgency, urgency with ambiguity, ambiguity), unreadable images and the out-of-scope category AMB-6. Coordinated the labeling and a second review of every item.
 - **Synthetic data generator.** Took over and fixed `evals/generator/generate.py` (text, PDF and JSON output) and `degradar.py` (degraded photos and scans in three legibility levels).
@@ -140,7 +140,7 @@ After the hackathon, in this fork, I deployed the public demo on Streamlit Commu
 | Carolina Chambique | Human review inside the graph |
 | Cristian Ojeda | Validation, urgencies, rules, human review endpoints and QA |
 | Leidy Diana Gaitan Fiaga | Edge cases, test set documents and demo video |
-| Maria Camila Gonzalez Nuñez | planning of all team activities, synthetic data and test set, evaluation, support in the agent design, Streamlit development (audit panel and metrics dashboard during the hackathon, full redesign of the interface afterwards) and documentation |
+| Maria Camila Gonzalez Nuñez | Project Lead, planning of all team activities, synthetic data and test set, evaluation, support in the agent design, Streamlit development (audit panel and metrics dashboard during the hackathon, full redesign of the interface afterwards) and documentation |
 | Néstor Gribaudo | Decision graph, scoring, routing, legibility gate and traces |
 | Sabrina Valentim Guimaraes | API, worker, persistence and backups |
 
